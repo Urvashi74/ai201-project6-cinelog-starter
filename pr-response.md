@@ -43,8 +43,11 @@ The @dev-lead's point is that recent additions are what users mostly care about,
 
 ## Comment 6 — Rebase
 **What conflicted:**
+I had 3 files show me conflicts. One was `.gitignore`, one was this file - `pr-response.md` and the third being the `models.py` file.
 **How I resolved it:**
+I was able to use the VSCode UI to check for the conflict files. The first one that I saw was the `.gitignore` file, I chose to use my current version as it had more items than the main branch, and then I marked it resolved it. I ran `git rebase --continue`, which then showed me a conflict in `pr-response.md`. I chose my version again, to not lose out on all the entries I had made in this file. Once done, I staged the changes using git add `filename`, and then hit `git rebase --continue`. I saw the UUID conflict in `models.py`. I made sure that WatchList Entry remained in the file, and I also made sure than the Films entry had the UUID change come in from Main. Once this was done I hit `git rebase --continue`. I had to push my changes, and for this I had to do a `git pull` first, followed by `git push`.
 **How I verified no conflict remains:**
+I checked my branch status with `git status`, which showed me no signs of being in a git rebase state. I also tried running `git rebase origin/main` again, which gave me the output of `Current branch feature/watchlist is up to date.` I also manually compared the code in `main` branch in the original repo and in my feature/watchlist branch. I also didn't see any merge commits.
 
 ## PR Description
 <!-- Written at the end — feature overview, design decisions, manual testing steps -->
