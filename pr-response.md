@@ -5,10 +5,13 @@
 
 ## Comment 1 — Rename
 **What I did:**
+Renamed all occurences of save_to_watchlist() to add_to_watchlist() to follow the project's naming convention.
 **How I verified:**
+Checked in the entire repo for all occurences of save_to_watchlist(), verified there were none left.
 
 ## Comment 2 — Deduplication
 **What I did:**
+Added a deduplication logic to query in the `WatchListEntry` model if a particular `user_id` and `film_id` was already present. If it was present, we throw `AlreadyInWatchListError`, else we make an entry in the WatchList DB.
 **How I verified:**
 
 ## Comment 3 — Missing test
