@@ -1,23 +1,28 @@
 # PR Response Doc — CineLog Watchlist Feature
 
 ## AI Usage
-<!-- Fill in at the end — how you used AI tools during this project -->
+I used Claude Code throughout this project. Most importantly, at the start I asked it to walk me through the repo module by module — what `models.py`, `services/`, `routes/`, and `tests/` were each responsible for — so I had a mental map before touching anything.
+
+Beyond that, I used AI for:
+- **Git commands when stuck.** Rebasing, resolving conflict markers, aborting a rebase mid-`squash`, and cleaning up commit messages to conventional format — I asked AI to explain what each command did and why, not just to run it for me.
+- **Locating the default visibility setting.** When I decided `public=True` should be the default, I asked AI to confirm where in the code that default is actually applied (`WatchlistEntry.public = db.Column(..., default=True)` in `models.py`) so my Comment 4 reasoning matched the real behavior.
+- **Verifying the feature end-to-end.** I asked AI to run `pytest tests/ -v` and confirm all 6 tests passed after the `film_id` UUID fix, so I knew the type change hadn't silently broken anything downstream.
 
 ## Comment 1 — Rename
 **What I did:**
-Renamed all occurences of save_to_watchlist() to add_to_watchlist() to follow the project's naming convention.
+Renamed all occurences of save_to_watchlist() to add_to_watchlist() to follow the project's naming convention. I used the VSCode's internal shortcut of Command+Shift+F to look for all the current occurences of save_to_watchlist() and then renamed each on individually to add_to_watchlist()
 **How I verified:**
-Checked in the entire repo for all occurences of save_to_watchlist(), verified there were none left.
+Checked in the entire repo for all occurences of save_to_watchlist(), verified there were none left. I used the VSCode's internal shortcut of Command+Shift+F to search across the repositories for any remaining occurences of save_to_watchlist() and found none.
 
 ## Comment 2 — Deduplication
 **What I did:**
-Added a deduplication logic to query in the `WatchListEntry` model if a particular `user_id` and `film_id` was already present. If it was present, we throw `AlreadyInWatchListError`, else we make an entry in the WatchList DB.
+Added a deduplication logic to query in the `WatchListEntry` model if a particular `user_id` and `film_id` was already present. If it was present, we throw `AlreadyInWatchListError`, else we make an entry in the WatchList DB. I modeled it on `add_to_collection()` in `services/collection_service.py`, which does the same `.filter_by().first()` check before inserting.
 **How I verified:**
 I added a testcase in `test_watchlist.py` that handles the deduplication scenario - we ensure to try and add a duplicate entry which then throws `AlreadyInWatchListError`. After that, we also verify that the count of the particular record is 1 in `WatchListEntry`.
 
 ## Comment 3 — Missing test
 **What I did:**
-Added a test case `test_add_to_watchlist_nonexistent_film_raises` to the file `test_watchlist.py` which addresses the missing test case that checks for non existent film to be added to the watchlist and the right error to be thrown.
+Added a test case `test_add_to_watchlist_nonexistent_film_raises` to the file `test_watchlist.py` which addresses the missing test case that checks for non existent film to be added to the watchlist and the right error to be thrown. I modeled it on `test_add_to_collection_nonexistent_film_raises` in `tests/test_collection.py`.
 **How I verified:**
 I ran the test case with the command `pytest tests/test_watchlist.py -v`. The test passed. For a good measure, I also ran the entire test suite `pytest tests/ -v`.
 
@@ -51,7 +56,28 @@ I checked my branch status with `git status`, which showed me no signs of being 
 
 ## PR Description
 <!-- Written at the end — feature overview, design decisions, manual testing steps -->
+What this feature does
+
+Adds a watchlist — a per-user list of films saved for later viewing, kept separate from the existing collection (which tracks films already watched). Users can add a film once, view their list back in newest-first order, and each entry carries a public visibility flag. Two endpoints ship under the /watchlist blueprint: POST /watchlist/<user_id>/add to save a film, and GET /watchlist/<user_id> to retrieve the list. Duplicate adds raise AlreadyInWatchlistError; adding a nonexistent film raises FilmNotFoundError.
+
+Design decisions
+
+- Default visibility is public=True. CineLog is a social product, and requiring users to toggle a flag to share means the social loop rarely starts. A watchlist is low-sensitivity ("films I want to watch") compared to ratings or reviews, and this PR ships no public-read endpoint — so nothing is actually exposed until the sharing UI lands alongside a clear public indicator. If a public read endpoint lands separately from that UI, existing rows should be backfilled to public=False first so no one is retroactively opted in.
+- Sort order is date_added descending. get_watchlist returns newest entries first rather than alphabetical by title. A watchlist behaves more like a to-do queue than a library — the common question is "what did I just add?" not "which film starts with G?" If title lookup becomes a need later, a search box is a better answer than an alphabetical sort.
+
+How to manually test
+
+1. Activate the venv and start the server: source .venv/bin/activate && flask --app app run.
+2. Seed one user and two films via the Flask shell or your seed script; note their UUIDs.
+3. Add the first film: curl -X POST http://localhost:5000/watchlist/<USER_UUID>/add -H "Content-Type: application/json" -d '{"film_id": "<FILM_UUID_1>"}'. Expect a success response with "public": true.
+4. Add the second film with the same command and <FILM_UUID_2>.
+5. View the watchlist: curl http://localhost:5000/watchlist/<USER_UUID>. Confirm the second film appears first — validates the sort-order decision.
+6. Confirm every entry in that response has "public": true — validates the visibility default.
+7. Retry step 3 with <FILM_UUID_1> a second time. Expect a 4xx "already in watchlist" error, and re-run step 5 to confirm no duplicate row was created.
+8. Retry step 3 with a random UUID that doesn't match any film. Expect a 4xx "film not found" error.
+9. Run the automated suite: pytest tests/ -v. Expect all 6 tests to pass (4 collection, 2 watchlist).
 
 ## git log --oneline screenshot
 
-<img width="786" height="418" alt="Screenshot 2026-07-14 at 18 14 53" src="https://github.com/user-attachments/assets/3d009ebb-7f36-4dab-b9f9-913b1b9ded5f" />
+<img width="932" height="604" alt="Screenshot 2026-07-14 at 18 56 54" src="https://github.com/user-attachments/assets/971a389f-1014-40e7-bec4-0d56ae964b57" />
+
