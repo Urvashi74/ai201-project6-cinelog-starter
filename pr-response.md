@@ -33,8 +33,13 @@ The tradeoff I can this of is that a user who thinks that the watchlists are pri
 
 ## Comment 5 — Sort order
 **My position:**
+I agree with the comment here. I will change the `get_watchlist()` in `services/watchlist_service.py` to sort by `date_added` descending instead of `Film.title` ascending, so the newest additions show up first.
+
 **Reasoning:**
+When I consider about how I user a watchlist myself, it feels more like a queue than a library. What I usually want to see is "what did I just add that I haven't watched yet", not what's alphabetically in order. I don't exactly remember all the titles to actually go through the watchlist like a dictionary. Since it is a to-do list for movies, it makes sense to have the most recent on the top. 
+
 **Engagement with reviewer's point:**
+The @dev-lead's point is that recent additions are what users mostly care about, and I agree with it. Alphabetically ordered could look more aesthetic and ordered, but nobody opens their watchlist to look at a sorted list, they just want to puck something to watch. Recency is a better signal for that than the first letter of the title. If we later find that users are hunting for a specific film by name, a search box is an easier solution for them to find the title, than alphabetical order.
 
 ## Comment 6 — Rebase
 **What conflicted:**
