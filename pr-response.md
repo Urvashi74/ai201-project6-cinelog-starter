@@ -51,3 +51,7 @@ I checked my branch status with `git status`, which showed me no signs of being 
 
 ## PR Description
 <!-- Written at the end — feature overview, design decisions, manual testing steps -->
+
+## git log --oneline screenshot
+
+<img width="786" height="418" alt="Screenshot 2026-07-14 at 18 14 53" src="https://github.com/user-attachments/assets/3d009ebb-7f36-4dab-b9f9-913b1b9ded5f" />
