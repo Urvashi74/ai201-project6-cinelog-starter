@@ -79,5 +79,6 @@ How to manually test
 
 ## git log --oneline screenshot
 
-<img width="932" height="604" alt="Screenshot 2026-07-14 at 18 56 54" src="https://github.com/user-attachments/assets/971a389f-1014-40e7-bec4-0d56ae964b57" />
+<img width="1088" height="497" alt="Screenshot 2026-07-14 at 20 08 20" src="https://github.com/user-attachments/assets/7f48fb25-f56a-4d58-b010-90dacd5fb745" />
+
 
